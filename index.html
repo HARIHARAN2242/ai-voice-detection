@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Voice Authenticity Detection</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-navy: #d6e4f5;          /* slightly darker, soft navy */
+      --card-bg: #f0f6ff;
+      --input-bg: #e8f1ff;        /* light blue boxes */
+      --primary: #1e3a8a;
+      --accent: #3b82f6;
+      --border-soft: #b6c9ea;
+      --text-dark: #1f2937;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #d6e4f5, #cbdaf0);
+      font-family: "Inter", sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 720px;
+      background: var(--card-bg);
+      border-radius: 18px;
+      padding: 35px 40px;
+      box-shadow: 0 20px 40px rgba(30, 58, 138, 0.18);
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary);
+      font-size: 28px;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 14px;
+      color: #475569;
+      margin-bottom: 30px;
+    }
+
+    /* Headings in different font */
+    .field-title {
+      font-family: "Montserrat", sans-serif;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+      color: var(--primary);
+      margin-bottom: 8px;
+      margin-top: 22px;
+    }
+
+    textarea,
+    select {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border-soft);
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 14px;
+      font-family: "Inter", sans-serif;
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    textarea {
+      min-height: 140px;
+      resize: vertical;
+      font-family: monospace;
+    }
+
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+    }
+
+    button {
+      margin-top: 30px;
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #1e40af, #2563eb);
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    button:hover {
+      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .result-box {
+      margin-top: 28px;
+      padding: 20px;
+      background: #e8f1ff;
+      border-radius: 14px;
+      border-left: 6px solid var(--accent);
+      display: none;
+    }
+
+    .result-box h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: var(--primary);
+      font-family: "Montserrat", sans-serif;
+      font-size: 16px;
+    }
+
+    .result-box pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-size: 14px;
+      color: var(--text-dark);
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 25px;
+      font-size: 12px;
+      color: #64748b;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>AI Voice Authenticity Detection</h1>
+    <div class="subtitle">
+      Analyze whether a voice sample is Human-generated or AI-generated
+    </div>
+
+    <div class="field-title">BASE64-ENCODED MP3 AUDIO</div>
+    <textarea id="audio" placeholder="Paste Base64 encoded MP3 audio here..."></textarea>
+
+    <div class="field-title">LANGUAGE</div>
+    <select id="language">
+      <option value="English">English</option>
+      <option value="Tamil">Tamil</option>
+      <option value="Hindi">Hindi</option>
+      <option value="Telugu">Telugu</option>
+      <option value="Malayalam">Malayalam</option>
+    </select>
+
+    <button onclick="detectVoice()">Analyze Voice</button>
+
+    <div class="result-box" id="result">
+      <h3>Detection Result</h3>
+      <pre id="resultText"></pre>
+    </div>
+
+    <footer>
+      Academic Prototype · Secure AI Voice Detection System
+    </footer>
+  </div>
+
+  <script>
+    async function detectVoice() {
+      const audio = document.getElementById("audio").value.trim();
+      const language = document.getElementById("language").value;
+      const resultBox = document.getElementById("result");
+      const resultText = document.getElementById("resultText");
+
+      if (!audio) {
+        alert("Please paste Base64 encoded audio.");
+        return;
+      }
+
+      resultText.textContent = "Analyzing voice sample...";
+      resultBox.style.display = "block";
+
+      try {
+        const response = await fetch("/detect", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer my_secret_key_123"
+          },
+          body: JSON.stringify({
+            audio_base64: audio,
+            language: language
+          })
+        });
+
+        const data = await response.json();
+        resultText.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        resultText.textContent = "Error connecting to server.";
+      }
+    }
+  </script>
+
+</body>
+</html>
