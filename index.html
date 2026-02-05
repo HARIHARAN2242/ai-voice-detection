@@ -1,178 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>AI Voice Authenticity Detection</title>
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-
   <style>
-    :root {
-      --bg-navy: #d6e4f5;          /* slightly darker, soft navy */
-      --card-bg: #f0f6ff;
-      --input-bg: #e8f1ff;        /* light blue boxes */
-      --primary: #1e3a8a;
-      --accent: #3b82f6;
-      --border-soft: #b6c9ea;
-      --text-dark: #1f2937;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
     body {
       margin: 0;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #d6e4f5, #cbdaf0);
-      font-family: "Inter", sans-serif;
+      padding: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #dbe7f5;
       display: flex;
-      align-items: center;
       justify-content: center;
-      padding: 20px;
+      align-items: center;
+      min-height: 100vh;
     }
 
     .container {
-      width: 100%;
-      max-width: 720px;
-      background: var(--card-bg);
+      background: #f3f8ff;
+      width: 720px;
+      padding: 30px 40px;
       border-radius: 18px;
-      padding: 35px 40px;
-      box-shadow: 0 20px 40px rgba(30, 58, 138, 0.18);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.12);
     }
 
     h1 {
       text-align: center;
-      color: var(--primary);
-      font-size: 28px;
-      margin-bottom: 6px;
+      color: #1e3a8a;
+      margin-bottom: 5px;
     }
 
     .subtitle {
       text-align: center;
-      font-size: 14px;
       color: #475569;
       margin-bottom: 30px;
-    }
-
-    /* Headings in different font */
-    .field-title {
-      font-family: "Montserrat", sans-serif;
       font-size: 15px;
-      letter-spacing: 0.5px;
-      color: var(--primary);
-      margin-bottom: 8px;
-      margin-top: 22px;
     }
 
-    textarea,
-    select {
-      width: 100%;
-      background: var(--input-bg);
-      border: 1px solid var(--border-soft);
-      border-radius: 12px;
-      padding: 14px;
-      font-size: 14px;
-      font-family: "Inter", sans-serif;
-      transition: border 0.2s ease, box-shadow 0.2s ease;
+    label {
+      display: block;
+      margin-top: 20px;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #1e40af;
+      font-family: "Georgia", serif;
+      letter-spacing: 0.5px;
     }
 
     textarea {
-      min-height: 140px;
+      width: 100%;
+      height: 130px;
       resize: vertical;
-      font-family: monospace;
+      padding: 12px;
+      font-size: 14px;
+      border-radius: 10px;
+      border: 1.5px solid #93c5fd;
+      background: #eaf2ff;
+      outline: none;
     }
 
-    textarea:focus,
-    select:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+    select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1.5px solid #93c5fd;
+      background: #eaf2ff;
+      font-size: 14px;
     }
 
     button {
-      margin-top: 30px;
       width: 100%;
-      padding: 15px;
+      margin-top: 30px;
+      padding: 14px;
+      background: linear-gradient(to right, #1e40af, #2563eb);
       border: none;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #1e40af, #2563eb);
       color: white;
       font-size: 16px;
-      font-weight: 600;
+      font-weight: bold;
+      border-radius: 12px;
       cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 
     button:hover {
-      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
-      transform: translateY(-1px);
-    }
-
-    button:active {
-      transform: scale(0.98);
+      opacity: 0.95;
     }
 
     .result-box {
-      margin-top: 28px;
-      padding: 20px;
-      background: #e8f1ff;
-      border-radius: 14px;
-      border-left: 6px solid var(--accent);
-      display: none;
+      margin-top: 30px;
+      background: #eaf2ff;
+      border-left: 6px solid #2563eb;
+      padding: 16px;
+      border-radius: 10px;
     }
 
-    .result-box h3 {
-      margin-top: 0;
-      margin-bottom: 10px;
-      color: var(--primary);
-      font-family: "Montserrat", sans-serif;
-      font-size: 16px;
+    .result-title {
+      font-weight: bold;
+      color: #1e3a8a;
+      margin-bottom: 8px;
     }
 
-    .result-box pre {
-      margin: 0;
+    .result-text {
+      font-family: Consolas, monospace;
       white-space: pre-wrap;
-      word-wrap: break-word;
       font-size: 14px;
-      color: var(--text-dark);
+      color: #0f172a;
     }
 
     footer {
-      text-align: center;
       margin-top: 25px;
-      font-size: 12px;
+      text-align: center;
+      font-size: 13px;
       color: #64748b;
     }
   </style>
 </head>
 
 <body>
-
   <div class="container">
     <h1>AI Voice Authenticity Detection</h1>
     <div class="subtitle">
       Analyze whether a voice sample is Human-generated or AI-generated
     </div>
 
-    <div class="field-title">BASE64-ENCODED MP3 AUDIO</div>
-    <textarea id="audio" placeholder="Paste Base64 encoded MP3 audio here..."></textarea>
+    <label>BASE64-ENCODED MP3 AUDIO</label>
+    <textarea id="audioBase64" placeholder="Paste Base64 audio here..."></textarea>
 
-    <div class="field-title">LANGUAGE</div>
+    <label>LANGUAGE</label>
     <select id="language">
-      <option value="English">English</option>
-      <option value="Tamil">Tamil</option>
-      <option value="Hindi">Hindi</option>
-      <option value="Telugu">Telugu</option>
-      <option value="Malayalam">Malayalam</option>
+      <option>English</option>
+      <option>Tamil</option>
+      <option>Hindi</option>
+      <option>Malayalam</option>
+      <option>Telugu</option>
     </select>
 
-    <button onclick="detectVoice()">Analyze Voice</button>
+    <button onclick="analyzeVoice()">Analyze Voice</button>
 
-    <div class="result-box" id="result">
-      <h3>Detection Result</h3>
-      <pre id="resultText"></pre>
+    <div class="result-box">
+      <div class="result-title">Detection Result</div>
+      <div id="result" class="result-text">Waiting for analysis…</div>
     </div>
 
     <footer>
@@ -181,40 +147,49 @@
   </div>
 
   <script>
-    async function detectVoice() {
-      const audio = document.getElementById("audio").value.trim();
+    async function analyzeVoice() {
+      const audioBase64 = document.getElementById("audioBase64").value.trim();
       const language = document.getElementById("language").value;
       const resultBox = document.getElementById("result");
-      const resultText = document.getElementById("resultText");
 
-      if (!audio) {
-        alert("Please paste Base64 encoded audio.");
+      if (!audioBase64) {
+        resultBox.textContent = "❌ Please paste Base64 audio.";
         return;
       }
 
-      resultText.textContent = "Analyzing voice sample...";
-      resultBox.style.display = "block";
+      resultBox.textContent = "⏳ Analyzing voice…";
 
       try {
         const response = await fetch("/detect", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer my_secret_key_123"
+
+            /* 🔐 API KEY HEADER (MUST MATCH RENDER) */
+            "x-api-key": "your_project_api_key_123"
           },
           body: JSON.stringify({
-            audio_base64: audio,
+            audio_base64: audioBase64,
             language: language
           })
         });
 
         const data = await response.json();
-        resultText.textContent = JSON.stringify(data, null, 2);
+
+        if (!response.ok) {
+          resultBox.textContent = JSON.stringify(data, null, 2);
+          return;
+        }
+
+        resultBox.textContent =
+          "Classification : " + data.classification + "\n" +
+          "Confidence     : " + data.confidence + "\n\n" +
+          "Explanation    : " + data.explanation;
+
       } catch (error) {
-        resultText.textContent = "Error connecting to server.";
+        resultBox.textContent = "❌ Error connecting to API.";
       }
     }
   </script>
-
 </body>
 </html>
