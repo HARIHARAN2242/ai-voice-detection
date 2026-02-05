@@ -8,7 +8,7 @@ import os
 # =========================
 # CONFIG
 # =========================
-API_KEY = os.getenv("API_KEY")
+API_KEY = os.getenv("API_KEY")  # set in Render
 
 app = FastAPI(
     title="AI Voice Authenticity Detection API",
@@ -37,7 +37,7 @@ def home():
         return f.read()
 
 # =========================
-# HELPER: ENTROPY
+# HELPER FUNCTION
 # =========================
 def shannon_entropy(data: bytes) -> float:
     freq = {}
@@ -51,32 +51,6 @@ def shannon_entropy(data: bytes) -> float:
         entropy -= p * math.log2(p)
 
     return entropy
-
-# =========================
-# LANGUAGE EXPLANATIONS
-# =========================
-LANGUAGE_EXPLANATION = {
-    "english": {
-        "AI-generated": "The English speech shows synthetic consistency and low natural variation, which is common in AI-generated voices.",
-        "Human-generated": "The English speech contains natural pauses and variations typical of human speech."
-    },
-    "tamil": {
-        "AI-generated": "இந்த தமிழ் குரலில் இயற்கையான ஏற்றத்தாழ்வுகள் குறைவாக உள்ளதால் இது செயற்கை குரலாக இருக்கலாம்.",
-        "Human-generated": "இந்த தமிழ் குரலில் மனித குரலுக்குரிய இயற்கையான மாற்றங்கள் காணப்படுகின்றன."
-    },
-    "hindi": {
-        "AI-generated": "इस हिंदी आवाज़ में कृत्रिम पैटर्न दिखाई देते हैं, जो AI जनरेशन का संकेत हो सकता है।",
-        "Human-generated": "इस हिंदी आवाज़ में मानवीय उतार-चढ़ाव और स्वाभाविकता है।"
-    },
-    "malayalam": {
-        "AI-generated": "ഈ മലയാളം ശബ്ദത്തിൽ കൃത്രിമ ഘടനകൾ കാണപ്പെടുന്നു.",
-        "Human-generated": "ഈ മലയാളം ശബ്ദത്തിൽ സ്വാഭാവികമായ മനുഷ്യ വ്യത്യാസങ്ങൾ ഉണ്ട്."
-    },
-    "telugu": {
-        "AI-generated": "ఈ తెలుగు స్వరంలో కృత్రిమ నమూనాలు కనిపిస్తున్నాయి.",
-        "Human-generated": "ఈ తెలుగు స్వరంలో మానవ స్వరానికి చెందిన సహజ మార్పులు ఉన్నాయి."
-    }
-}
 
 # =========================
 # DETECTION API
@@ -93,28 +67,54 @@ def detect_voice(
     # Decode Base64
     try:
         audio_bytes = base64.b64decode(request.audio_base64)
-    except:
+    except Exception:
         raise HTTPException(status_code=400, detail="Invalid Base64 audio")
 
-    if len(audio_bytes) < 200:
-        raise HTTPException(status_code=400, detail="Audio is too short")
+    if len(audio_bytes) < 2000:
+        return {
+            "classification": "Unknown",
+            "confidence": 0.0,
+            "explanation": "Audio sample is too short for reliable analysis"
+        }
 
-    # Entropy-based heuristic
     entropy = shannon_entropy(audio_bytes)
 
-    if entropy < 4.2:
+    # Simple heuristic logic (prototype)
+    if entropy > 7.5:
         classification = "AI-generated"
-        confidence = round(0.75 + (4.2 - entropy) * 0.05, 2)
+        confidence = 0.86
     else:
         classification = "Human-generated"
-        confidence = round(0.75 + (entropy - 4.2) * 0.05, 2)
+        confidence = 0.84
 
-    confidence = min(confidence, 0.99)
+    # Language-based explanation
+    explanations = {
+        "tamil": {
+            "AI-generated": "இந்த குரலில் இயந்திரம் உருவாக்கிய ஒலி பண்புகள் காணப்படுகின்றன.",
+            "Human-generated": "இந்த குரலில் இயல்பான மனித பேச்சு மாறுபாடுகள் உள்ளன."
+        },
+        "english": {
+            "AI-generated": "The voice shows synthetic patterns typical of AI generation.",
+            "Human-generated": "The voice contains natural human speech variations."
+        },
+        "hindi": {
+            "AI-generated": "इस आवाज़ में एआई द्वारा उत्पन्न ध्वनि पैटर्न पाए गए हैं।",
+            "Human-generated": "इस आवाज़ में प्राकृतिक मानवीय भाषण के गुण मौजूद हैं।"
+        },
+        "malayalam": {
+            "AI-generated": "ഈ ശബ്ദത്തിൽ എഐ സിന്തറ്റിക് ലക്ഷണങ്ങൾ കണ്ടെത്തി.",
+            "Human-generated": "ഈ ശബ്ദത്തിൽ സ്വാഭാവിക മനുഷ്യ ശബ്ദ വ്യത്യാസങ്ങൾ കാണുന്നു."
+        },
+        "telugu": {
+            "AI-generated": "ఈ వాయిస్‌లో AI సృష్టించిన లక్షణాలు కనిపిస్తున్నాయి.",
+            "Human-generated": "ఈ వాయిస్‌లో సహజమైన మానవ మాట్లాడే లక్షణాలు ఉన్నాయి."
+        }
+    }
 
     lang = request.language.lower()
-    explanation = LANGUAGE_EXPLANATION.get(
+    explanation = explanations.get(
         lang,
-        LANGUAGE_EXPLANATION["english"]
+        explanations["english"]
     )[classification]
 
     return {
