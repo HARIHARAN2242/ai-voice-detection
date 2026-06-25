@@ -3,6 +3,7 @@
 # AI-Generated Voice Detection API
 
 This project detects whether a given voice sample is **AI-generated** or **Human-generated**.
+it allows user to find whether a voice is aigenerated or not
 
 ## Features
 - Accepts Base64-encoded MP3 audio
